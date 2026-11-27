@@ -29,7 +29,44 @@ namespace DeliveryRoutes.Backend
             }
 
             shortestPaths = new Dictionary<string, ShortestPaths>();
+            ValidateConnectivity();
         }
+
+        private void ValidateConnectivity()
+        {
+            HashSet<string> importantLocations = new HashSet<string>();
+
+            importantLocations.Add(start);
+
+            foreach (Package package in packages)
+            {
+                importantLocations.Add(package.Pickup);
+                importantLocations.Add(package.Delivery);
+            }
+
+            foreach (string source in importantLocations)
+            {
+                if (!shortestPaths.ContainsKey(source))
+                {
+                    shortestPaths[source] =
+                        ShortestPaths.Dijkstra(city, source);
+                }
+
+                foreach (string destination in importantLocations)
+                {
+                    double distance = shortestPaths[source]
+                        .GetDistanceTo(destination);
+
+                    if (double.IsPositiveInfinity(distance))
+                    {
+                        throw new InvalidOperationException(
+                            $"Location '{destination}' cannot be reached " +
+                            $"from location '{source}'.");
+                    }
+                }
+            }
+        }
+
 
         public double TotalDistance(List<Stop> route)
         {

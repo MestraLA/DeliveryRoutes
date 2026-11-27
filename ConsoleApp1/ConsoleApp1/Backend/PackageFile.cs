@@ -9,8 +9,16 @@ namespace DeliveryRoutes.Backend
     {
         public static List<Package> Load(string path, Graph city)
         {
-            Dictionary<int, (string Pickup, string Delivery)> tasks =
-                new Dictionary<int, (string Pickup, string Delivery)>();
+            Dictionary<int, (
+                string Pickup,
+                string Delivery,
+                int PickupLine,
+                int DeliveryLine)> tasks =
+                new Dictionary<int, (
+                    string Pickup,
+                    string Delivery,
+                    int PickupLine,
+                    int DeliveryLine)>();
 
             string[] lines = File.ReadAllLines(path);
 
@@ -62,30 +70,36 @@ namespace DeliveryRoutes.Backend
 
                 if (!tasks.ContainsKey(packageId))
                 {
-                    tasks.Add(packageId, ("", ""));
+                    tasks.Add(packageId, ("", "", 0, 0));
                 }
 
-                (string Pickup, string Delivery) packageTasks = tasks[packageId];
+                var packageTasks = tasks[packageId];
 
                 if (action.Equals("Pickup", StringComparison.OrdinalIgnoreCase))
                 {
                     if (packageTasks.Pickup != "")
                     {
                         throw new FormatException(
-                            $"Package {packageId} has more than one Pickup.");
+                            $"Package {packageId} has more than one Pickup. " +
+                            $"First occurrence at line {packageTasks.PickupLine}, " +
+                            $"duplicate at line {i + 1}.");
                     }
 
                     packageTasks.Pickup = location;
+                    packageTasks.PickupLine = i + 1;
                 }
                 else
                 {
                     if (packageTasks.Delivery != "")
                     {
                         throw new FormatException(
-                            $"Package {packageId} has more than one Delivery.");
+                            $"Package {packageId} has more than one Delivery. " +
+                            $"First occurrence at line {packageTasks.DeliveryLine}, " +
+                            $"duplicate at line {i + 1}.");
                     }
 
                     packageTasks.Delivery = location;
+                    packageTasks.DeliveryLine = i + 1;
                 }
 
                 tasks[packageId] = packageTasks;
@@ -93,18 +107,24 @@ namespace DeliveryRoutes.Backend
 
             List<Package> packages = new List<Package>();
 
-            foreach (KeyValuePair<int, (string Pickup, string Delivery)> item in tasks)
+            foreach (KeyValuePair<int, (
+                string Pickup,
+                string Delivery,
+                int PickupLine,
+                int DeliveryLine)> item in tasks)
             {
                 if (item.Value.Pickup == "")
                 {
                     throw new FormatException(
-                        $"Package {item.Key} is missing its Pickup.");
+                        $"Package {item.Key} is missing its Pickup. " +
+                        $"Delivery was found at line {item.Value.DeliveryLine}.");
                 }
 
                 if (item.Value.Delivery == "")
                 {
                     throw new FormatException(
-                        $"Package {item.Key} is missing its Delivery.");
+                        $"Package {item.Key} is missing its Delivery. " +
+                        $"Pickup was found at line {item.Value.PickupLine}.");
                 }
 
                 packages.Add(new Package(
