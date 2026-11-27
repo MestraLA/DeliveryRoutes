@@ -8,7 +8,6 @@ namespace DeliveryRoutes
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("PRUEBA: NUEVO PROGRAM EJECUTADO");
             try
             {
                 string cityPath;
@@ -23,13 +22,13 @@ namespace DeliveryRoutes
                 }
                 else
                 {
-                    Console.Write("Enter the city file path: ");
+                    Console.Write("Ingrese la ruta del archivo de ciudades: ");
                     cityPath = Console.ReadLine() ?? "";
 
-                    Console.Write("Enter the packages file path: ");
+                    Console.Write("Ingrese la ruta del archivo de paquetes: ");
                     packagesPath = Console.ReadLine() ?? "";
 
-                    Console.Write("Enter the starting location: ");
+                    Console.Write("Ingrese la ubicación inicial: ");
                     start = Console.ReadLine() ?? "";
                 }
 
@@ -38,9 +37,6 @@ namespace DeliveryRoutes
                 var packages = PackageFile.Load(
                     packagesPath,
                     city);
-                Console.WriteLine($"Paquetes cargados: {packages.Count}");
-                
-
 
                 RoutePlanner planner = new RoutePlanner(
                     city,
@@ -54,7 +50,6 @@ namespace DeliveryRoutes
                     planner,
                     route,
                     start);
-
             }
             catch (Exception ex)
             {
